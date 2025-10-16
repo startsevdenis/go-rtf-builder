@@ -2,6 +2,7 @@ package go_rtf_builder
 
 import (
 	"fmt"
+	"image/color"
 	"strings"
 )
 
@@ -11,6 +12,24 @@ type docMargins struct {
 	top    int
 	bottom int
 }
+
+type fcTables struct {
+	fontTable  fontTable
+	colorTable colorTable
+}
+
+//func (r *fcTables) registerFont(style FontStyle) (int, int) {
+//	fc := r.fontTable.AddFont(fontItem{
+//		family: style.family,
+//		Name:   style.Name,
+//	})
+//
+//	cc := r.colorTable.AddColor(colorItem{
+//		rgbColor: color.RGBA{},
+//	})
+//
+//	return fc, cc
+//}
 
 func (m docMargins) output(unit float32) string {
 	return fmt.Sprintf(
@@ -30,10 +49,11 @@ type RtfDocument struct {
 	documentHeader   DocumentHeader
 	measureUnit      float32
 	contentItems     []ContentItemInterface
+	fcTables         fcTables
 }
 
 func NewRtfDocument(paperSize string, paperOrientation string) *RtfDocument {
-	return &RtfDocument{
+	doc := &RtfDocument{
 		paperSize:        paperSize,
 		paperOrientation: paperOrientation,
 		margins: docMargins{
@@ -43,21 +63,153 @@ func NewRtfDocument(paperSize string, paperOrientation string) *RtfDocument {
 			bottom: 0,
 		},
 		measureUnit: UnitCm,
+		fcTables: fcTables{
+			fontTable: fontTable{
+				fonts: map[uint64]struct {
+					position int
+					item     fontItem
+				}{},
+				nextPosition: 0,
+			},
+			colorTable: colorTable{
+				colors: []struct {
+					position int
+					item     colorItem
+				}{},
+				nextPosition: 1,
+			},
+		},
 		header: header{
 			version: "1",
 			charSet: "ansi",
 			deff:    "0",
 		}}
+	doc.registerDefaultColors()
+	doc.registerDefaultFonts()
+	return doc
 }
 
-func (doc *RtfDocument) AddParagraph(font FontStyle) *Paragraph {
+func (doc *RtfDocument) RegisterNewColor(color colorItem) {
+	doc.fcTables.colorTable.AddColor(color)
+}
+
+func (doc *RtfDocument) registerDefaultFonts() {
+	doc.fcTables.fontTable.AddFont(fontItem{
+		family:  FamilyRoman,
+		charset: 0,
+		prq:     2,
+		name:    "Times New Roman",
+		code:    FontTimesNewRoman,
+	})
+
+	doc.fcTables.fontTable.AddFont(fontItem{
+		family:  FamilyRoman,
+		charset: 2,
+		prq:     2,
+		name:    "Symbol",
+		code:    FontSymbol,
+	})
+
+	doc.fcTables.fontTable.AddFont(fontItem{
+		family:  FamilySwiss,
+		charset: 0,
+		prq:     2,
+		name:    "Arial",
+		code:    FontArial,
+	})
+
+	doc.fcTables.fontTable.AddFont(fontItem{
+		family:  FamilySwiss,
+		charset: 0,
+		prq:     2,
+		name:    "Comic Sans MS",
+		code:    FontComicSansMS,
+	})
+
+	doc.fcTables.fontTable.AddFont(fontItem{
+		family:  FamilyModern,
+		charset: 128,
+		prq:     2,
+		name:    "Curier New",
+		code:    FontCourierNew,
+	})
+}
+
+func (doc *RtfDocument) registerDefaultColors() {
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
+		name:     ColorBlack,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 0, B: 255, A: 255},
+		name:     ColorBlue,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 255, B: 255, A: 255},
+		name:     ColorAqua,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 255, B: 0, A: 255},
+		name:     ColorLime,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 128, B: 0, A: 255},
+		name:     ColorGreen,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 255, G: 0, B: 255, A: 255},
+		name:     ColorMagenta,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 255, G: 0, B: 0, A: 255},
+		name:     ColorRed,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 255, G: 255, B: 0, A: 255},
+		name:     ColorYellow,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 255, G: 255, B: 255, A: 255},
+		name:     ColorWhite,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 0, B: 128, A: 255},
+		name:     ColorNavy,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 0, G: 128, B: 128, A: 255},
+		name:     ColorTeal,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 128, G: 0, B: 128, A: 255},
+		name:     ColorPurple,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 128, G: 0, B: 0, A: 255},
+		name:     ColorMaroon,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 128, G: 128, B: 0, A: 255},
+		name:     ColorOlive,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 128, G: 128, B: 128, A: 255},
+		name:     ColorGray,
+	})
+	doc.fcTables.colorTable.AddColor(colorItem{
+		rgbColor: color.RGBA{R: 192, G: 192, B: 192, A: 255},
+		name:     ColorSilver,
+	})
+}
+func (doc *RtfDocument) AddParagraph(textAlign string) *Paragraph {
+
 	var paragraph = Paragraph{
-		font:            font,
 		indentFirstLine: 10,
 		indentLeft:      0,
 		indentRight:     0,
-		align:           AlignLeft,
+		align:           textAlign,
 		contentItems:    nil,
+		fcTables:        &doc.fcTables,
 	}
 	doc.contentItems = append(doc.contentItems, &paragraph)
 	return &paragraph
@@ -107,6 +259,10 @@ func (doc *RtfDocument) Output() []byte {
 
 	result.WriteString("{")
 	result.WriteString(doc.header.output())
+
+	result.WriteString(fmt.Sprintf("\n{\\fonttbl;%s}", doc.fcTables.fontTable.output()))
+	result.WriteString(fmt.Sprintf("\n{\\colortbl;%s}", doc.fcTables.colorTable.output()))
+
 	if doc.paperOrientation == PaperOrientationLandscape {
 		result.WriteString(fmt.Sprintf("\n\\landscape"))
 	}

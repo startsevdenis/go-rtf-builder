@@ -1,6 +1,7 @@
 package go_rtf_builder
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -13,7 +14,10 @@ type Text struct {
 	isSuper       bool
 	isSub         bool
 	isStrike      bool
-	font          FontStyle
+	fontCode      string
+	fontSize      int
+	colorCode     string
+	fcTables      *fcTables
 }
 
 func (t *Text) render(unit float32) string {
@@ -48,8 +52,8 @@ func (t *Text) render(unit float32) string {
 	}
 
 	convText := convertNonASCIIToUTF16(t.content)
-	result.WriteString(convText)
-	//result.WriteString(fmt.Sprintf("\n\\sb0 \\sa0 \\fs%d\\f%d \\cf%d{%s}\\f0", t.font.size, t.font.family, text.colorCode, convText))
+
+	result.WriteString(fmt.Sprintf("\n\\sb0 \\sa0 \\fs%d\\f%d \\cf%d{%s}\\f0", t.fontSize*2, t.fcTables.fontTable.getFontCode(t.fontCode), t.fcTables.colorTable.getColorCode(t.colorCode), convText))
 	if t.isBold {
 		result.WriteString("\\b0 ")
 	}
@@ -111,7 +115,7 @@ func (t *Text) SetStrike() *Text {
 	return t
 }
 
-func (t *Text) SetFont(f FontStyle) *Text {
-	t.font = f
-	return t
-}
+//func (t *Text) SetFont(f FontStyle) *Text {
+//	t.font = f
+//	return t
+//}

@@ -1,17 +1,15 @@
 package go_rtf_builder
 
 type FontStyle struct {
-	size    int
-	family  string
-	color   string
-	bgColor string
+	Size  int
+	Name  string
+	Color string
 }
 
-func NewFontStyle(size int, family string) *FontStyle {
+func NewFontStyle(size int, name string, color string) *FontStyle {
 	return &FontStyle{
-		size:    size,
-		family:  family,
-		bgColor: "#ffffff",
-		color:   "#000000",
+		Size:  size,
+		Name:  name,
+		Color: color,
 	}
 }

@@ -28,6 +28,11 @@ const (
 )
 
 const (
+	SpaseInLines  = 240
+	SpaceInPoints = 20
+)
+
+const (
 	ColorBlack   = "color_black"
 	ColorBlue    = "color_blue"
 	ColorAqua    = "color_aqua"
@@ -53,4 +58,19 @@ const (
 	FontArial         = "font_arial"
 	FontComicSansMS   = "font_comic_sans_ms"
 	FontCourierNew    = "font_courier_new"
+)
+
+const (
+	FamilyNil    = "nil"    // Unknown or default fonts (the default)
+	FamilyRoman  = "roman"  // Roman, proportionally spaced serif fonts
+	FamilySwiss  = "swiss"  // Swiss, proportionally spaced sans serif fonts
+	FamilyModern = "modern" // Fixed-pitch serif and sans serif fonts
+	FamilyScript = "script" // Script fonts
+	FamilyDecor  = "decor"  // Decorative fonts
+	FamilyTech   = "tech"   // Technical, symbol, and mathematical fonts
+	FamilyBidi   = "bidi"   // Arabic, Hebrew, or other bidirectional font
+)
+
+const (
+	spaceInPoints = 20
 )
